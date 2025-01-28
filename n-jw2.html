@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permainan Huruf Jawa</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .button {
+            width: 60px;
+            height: 60px;
+            background-color: #FEFDBC;
+            border: 2px solid #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-family: 'Noto Sans Javanese', sans-serif;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.1s;
+        }
+
+        .button:active {
+            transform: translateY(5px);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            background-color: #C4FFC4;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .control-button.delete {
+            background-color: #FFC4C4;
+        }
+
+        .control-button:active {
+            transform: translateY(5px);
+        }
+
+        .info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        .output {
+            margin: 10px 0;
+            font-size: 24px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Permainan Huruf Jawa</h1>
+
+    <div class="output" id="latinWord">Kata Latin: -</div>
+    <div class="output" id="jawaWord">Huruf Jawa: </div>
+
+    <div class="game-board" id="jawaBoard"></div>
+
+    <div class="controls">
+        <button class="control-button confirm" id="confirmButton">MENIKA</button>
+        <button class="control-button delete" id="deleteButton">GOSOK</button>
+    </div>
+
+    <div class="info" id="gameInfo">
+        <span id="time">Waktu: 300 s</span> | <span id="score">Skor: 0</span> | <span id="lives">Nyawa: 3</span>
+    </div>
+
+    <script>
+        const latinWords = ["main", "wangi", "mlebu"];
+        const jawaWords = ["ꦩꦲꦶꦤ꧀", "ꦮꦔꦶ", "ꦩ꧀ꦭꦼꦧꦸ"];
+        const jawaLetters = ["ꦲ", "ꦤ", "ꦕ", "ꦫ", "ꦏ", "ꦢ", "ꦠ", "ꦱ", "ꦮ", "ꦭ", "ꦥ", "ꦣ", "ꦗ", "ꦪ", "ꦚ", "ꦩ", "ꦒ", "ꦧ", "ꦛ", "ꦔ", 
+		"ꦶ", "ꦸ", "ꦺ", "ꦼ", "ꦉ", "꧀"];
+
+        let currentLatin = "";
+        let currentJawa = "";
+        let timeLeft = 300;
+        let score = 0;
+        let lives = 3;
+
+        const latinWordEl = document.getElementById("latinWord");
+        const jawaWordEl = document.getElementById("jawaWord");
+        const timeEl = document.getElementById("time");
+        const scoreEl = document.getElementById("score");
+        const livesEl = document.getElementById("lives");
+        const jawaBoard = document.getElementById("jawaBoard");
+
+        function chooseNewWord() {
+            if (latinWords.length === 0) {
+                alert("Selamat! Anda telah menyelesaikan permainan.");
+                return;
+            }
+            const index = Math.floor(Math.random() * latinWords.length);
+            currentLatin = latinWords.splice(index, 1)[0];
+            currentJawa = jawaWords.splice(index, 1)[0];
+            latinWordEl.textContent = `Kata Latin: ${currentLatin}`;
+            jawaWordEl.textContent = "Huruf Jawa: ";
+        }
+
+        function createJawaBoard() {
+            jawaBoard.innerHTML = "";
+            jawaLetters.forEach(letter => {
+                const button = document.createElement("div");
+                button.className = "button";
+                button.textContent = letter;
+                button.addEventListener("click", () => {
+                    jawaWordEl.textContent += letter;
+                });
+                jawaBoard.appendChild(button);
+            });
+        }
+
+        document.getElementById("confirmButton").addEventListener("click", () => {
+            if (jawaWordEl.textContent.replace("Huruf Jawa: ", "") === currentJawa) {
+                score++;
+                scoreEl.textContent = `Skor: ${score}`;
+                chooseNewWord();
+            } else {
+                lives--;
+                livesEl.textContent = `Nyawa: ${lives}`;
+                if (lives <= 0) {
+                    alert("Permainan selesai! Skor Anda: " + score);
+                    location.reload();
+                }
+            }
+        });
+
+        document.getElementById("deleteButton").addEventListener("click", () => {
+            const text = jawaWordEl.textContent.replace("Huruf Jawa: ", "");
+            jawaWordEl.textContent = "Huruf Jawa: " + text.slice(0, -1);
+        });
+
+        function startGame() {
+            chooseNewWord();
+            createJawaBoard();
+            const timer = setInterval(() => {
+                timeLeft--;
+                timeEl.textContent = `Waktu: ${timeLeft} s`;
+                if (timeLeft <= 0 || lives <= 0) {
+                    clearInterval(timer);
+                    alert("Waktu habis! Skor Anda: " + score);
+                    location.reload();
+                }
+            }, 1000);
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
